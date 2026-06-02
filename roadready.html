@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#16181d">
+<title>RoadReady — Virginia VADETS Prep</title>
+<style>
+  :root{
+    --asphalt:#16181d; --asphalt2:#1f232b; --panel:#232831;
+    --line:#FFD23F; --green:#2F9E44; --greenDeep:#1B5E20;
+    --red:#E03131; --text:#F1F3F5; --sub:#9aa3af; --border:#2c313b;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+    color:var(--text);
+    background:radial-gradient(900px 500px at 80% -10%, #2a2f3a 0%, transparent 60%),
+               linear-gradient(180deg, var(--asphalt2) 0%, var(--asphalt) 100%);
+    background-attachment:fixed;
+    padding:16px;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  h1{font-size:clamp(40px,12vw,52px); font-weight:900; line-height:1.02; margin:18px 0 6px; letter-spacing:-1.5px; text-align:center;}
+  h1 span{color:var(--line);}
+  .tag{display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px;
+       background:var(--greenDeep); border:2px solid var(--line); font-size:12px; font-weight:800; letter-spacing:1px;}
+  .center{text-align:center;}
+  .sub{color:var(--sub);}
+  .lead{color:var(--sub); font-size:16px; max-width:470px; margin:0 auto 24px; text-align:center; line-height:1.5;}
+  .lead b{color:var(--text);}
+
+  button{font-family:inherit; cursor:pointer; border:none;}
+  .btn{transition:transform .12s ease, filter .15s ease;}
+  .btn:active{transform:scale(.98);}
+
+  .modeBtn{display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:14px;
+           color:#fff; width:100%; margin-bottom:14px; text-align:left;}
+  .modeBtn .t{font-size:18px; font-weight:900;}
+  .modeBtn .d{font-size:13px; opacity:.85; font-weight:600;}
+  .modeBtn .ic{font-size:24px;}
+  .pulse{animation:pulseGlow 2.4s infinite;}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(47,158,68,.5)}50%{box-shadow:0 0 0 10px rgba(47,158,68,0)}}
+
+  .backBtn{background:transparent; color:var(--sub); font-weight:700; font-size:13px; padding:4px 0; margin-bottom:6px;}
+
+  .examBtn{width:100%; display:flex; align-items:center; gap:14px; padding:18px; border-radius:14px;
+           border:2px solid var(--line); background:linear-gradient(90deg, rgba(255,210,63,.16), transparent);
+           color:var(--text); margin-bottom:18px; text-align:left;}
+  .examBtn .t{font-size:17px; font-weight:900;}
+  .examBtn .d{font-size:13px; color:var(--sub); font-weight:600;}
+
+  .orRow{display:flex; align-items:center; gap:8px; color:var(--sub); font-size:12px; font-weight:800; letter-spacing:1px; margin:4px 0 12px;}
+
+  .modGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px;}
+  .modCard{background:var(--panel); border:2px solid var(--border); border-radius:12px; padding:13px 14px;
+           transition:transform .12s ease, border-color .15s; text-align:left; color:var(--text);}
+  .modCard:active{transform:scale(.98);}
+  .modCard .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
+  .modCard .num{font-weight:900; color:var(--line); font-size:13px;}
+  .modCard .qc{font-size:11px; color:var(--sub); font-weight:700;}
+  .modCard .nm{font-size:14px; font-weight:700; line-height:1.25;}
+
+  /* HUD */
+  .hud{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;}
+  .chip{display:flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--border);
+        padding:8px 12px; border-radius:10px; font-weight:800; font-size:15px;}
+  .chip svg{width:16px; height:16px;}
+  .scopeName{text-align:center; color:var(--sub); font-size:12px; font-weight:700; margin-bottom:10px;}
+
+  /* road */
+  .road{position:relative; height:34px; background:var(--asphalt); border-radius:10px; border:1px solid var(--border); overflow:hidden; margin-bottom:8px;}
+  .road .dashes{position:absolute; top:50%; left:0; right:0; height:3px; transform:translateY(-50%);
+                background-image:repeating-linear-gradient(90deg, var(--line) 0 16px, transparent 16px 30px); opacity:.55;}
+  .road .car{position:absolute; top:50%; transform:translateY(-50%); transition:left .4s ease;}
+  .road .car svg{width:26px; height:26px; display:block;}
+  .road .flag{position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:16px;}
+
+  .meta{display:flex; justify-content:space-between; color:var(--sub); font-size:12px; margin-bottom:16px;}
+  .meta .timer{font-weight:800;}
+
+  .card{background:var(--panel); border-radius:16px; padding:20px; border:2px solid var(--border); animation:pop .25s ease;}
+  .card.good{border-color:var(--green);}
+  .card.bad{border-color:var(--red); animation:shake .4s;}
+  @keyframes pop{0%{transform:scale(.97);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+  .badge{display:inline-block; font-size:11px; font-weight:800; letter-spacing:1px; color:var(--line);
+         background:var(--greenDeep); padding:4px 10px; border-radius:6px; margin-bottom:12px;}
+  .qtext{font-size:19px; font-weight:800; line-height:1.3; margin-bottom:18px;}
+
+  .opts{display:grid; gap:10px;}
+  .opt{display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left;
+       padding:14px 16px; border-radius:11px; background:var(--asphalt2); border:2px solid #343a45;
+       color:var(--text); font-size:15.5px; font-weight:600; width:100%; transition:transform .1s, background .15s, border-color .15s;}
+  .opt:active{transform:scale(.99);}
+  .opt .lab{font-weight:900; color:var(--line); margin-right:10px;}
+  .opt.correct{background:rgba(47,158,68,.18); border-color:var(--green);}
+  .opt.wrong{background:rgba(224,49,49,.16); border-color:var(--red);}
+  .opt.dim{color:var(--sub);}
+  .opt .mark{font-weight:900; font-size:18px;}
+  .opt[disabled]{cursor:default;}
+
+  .why{margin-top:16px; padding:14px; border-radius:11px; background:var(--asphalt); border-left:4px solid var(--line);}
+  .why .head{font-weight:800; font-size:13px; margin-bottom:4px;}
+  .why .body{font-size:14.5px; line-height:1.45;}
+
+  .nextBtn{margin-top:16px; width:100%; padding:14px; border-radius:11px; background:var(--line); color:#1a1a1a;
+           font-weight:900; font-size:16px; display:flex; align-items:center; justify-content:center; gap:6px;}
+
+  /* results */
+  .award{font-size:54px; margin-bottom:2px;}
+  .bigpct{font-size:64px; font-weight:900; line-height:1;}
+  .stats{display:flex; gap:10px; justify-content:center; margin:20px 0; flex-wrap:wrap;}
+  .statBox{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 22px; min-width:92px;}
+  .statNum{font-size:24px; font-weight:900;}
+  .statLbl{font-size:12px; color:var(--sub); font-weight:600; margin-top:2px;}
+  .review{text-align:left; background:var(--panel); border-radius:14px; padding:18px; margin:0 auto 18px; max-width:600px; border:1px solid var(--border);}
+  .review h3{font-weight:900; margin:0 0 12px; font-size:15px;}
+  .rev{margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border);}
+  .rev:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  .rev .m{font-size:11px; font-weight:800; color:var(--line); margin-bottom:3px;}
+  .rev .q{font-size:14.5px; font-weight:700; margin-bottom:4px;}
+  .rev .a{font-size:13.5px; color:var(--green); font-weight:700; margin-bottom:3px;}
+  .rev .w{font-size:13.5px; color:var(--sub); line-height:1.45;}
+  .endBtns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .endBtns button{padding:14px 22px; border-radius:11px; font-weight:900; font-size:15px; display:flex; align-items:center; gap:8px;}
+  .retry{background:var(--green); color:#fff;}
+  .change{background:transparent; color:var(--line); border:2px solid var(--line)!important; border:2px solid;}
+
+  .footer{text-align:center; color:var(--sub); font-size:11px; margin-top:20px; line-height:1.5;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+"use strict";
+
+// ===== 12 VADETS MODULES =====
+const MODULES = [
+  {id:1,name:"Juvenile Licensing & Responsibilities",short:"Licensing"},
+  {id:2,name:"Preparing to Operate a Vehicle",short:"Pre-Drive"},
+  {id:3,name:"Vision and Driving",short:"Vision"},
+  {id:4,name:"Laws of Nature & Basic Maneuvers",short:"Physics"},
+  {id:5,name:"Navigating Roadways",short:"Navigating"},
+  {id:6,name:"Sharing the Road with Others",short:"Sharing"},
+  {id:7,name:"Night, Weather, Crash & Off-Road Recovery",short:"Conditions"},
+  {id:8,name:"Vehicle Systems & Maintenance",short:"Maintenance"},
+  {id:9,name:"Highway/Vehicle Safety Design & Tech",short:"Safety Tech"},
+  {id:10,name:"Alcohol and Other Drugs",short:"Alcohol/Drugs"},
+  {id:11,name:"Driver Attention",short:"Attention"},
+  {id:12,name:"Driver Responsibilities",short:"Responsibilities"},
+];
+
+// ===== QUESTION BANK (verified vs Virginia Driver's Manual) =====
+const QUESTIONS = [
+  // M1
+  {m:1,q:"What is the minimum age to get a learner's permit in Virginia?",options:["15 years","15 years, 6 months","16 years","16 years, 3 months"],correct:1,why:"You must be at least 15 years and 6 months old to get a Virginia learner's permit."},
+  {m:1,q:"How long must you hold a learner's permit before getting a driver's license (if under 18)?",options:["3 months","6 months","9 months","12 months"],correct:2,why:"Drivers under 18 must hold the permit at least 9 months before getting a license."},
+  {m:1,q:"How many hours of supervised driving must a teen complete, and how many at night?",options:["30 total, 5 at night","45 total, 15 at night","50 total, 10 at night","60 total, 20 at night"],correct:1,why:"Virginia requires 45 hours of supervised practice, including at least 15 hours after sunset."},
+  {m:1,q:"Drivers under 18 with a junior license generally may not drive between:",options:["10 p.m. – 5 a.m.","Midnight – 4 a.m.","11 p.m. – 6 a.m.","There's no restriction"],correct:1,why:"The curfew for drivers under 18 is midnight to 4 a.m., with limited exceptions like work or emergencies."},
+  {m:1,q:"In the FIRST year of a junior license, how many passengers under 21 may you carry?",options:["No limit","Only 1","Up to 3","Up to 5"],correct:1,why:"First year: only one passenger under 21 (family members are exceptions). After that, up to three until you turn 18."},
+  {m:1,q:"Drivers under 18 in Virginia may use a cell phone while driving:",options:["Only hands-free","Only for texting","Not at all","Only on highways"],correct:2,why:"Drivers under 18 may not use ANY cell phone while driving, even hands-free."},
+  {m:1,q:"What is the minimum age to receive a Virginia driver's license?",options:["16 years","16 years, 3 months","16 years, 6 months","17 years"],correct:1,why:"You must be at least 16 years and 3 months old to get a license in Virginia."},
+  {m:1,q:"A teen's license can be suspended by a court for:",options:["Getting a B in class","Truancy or dropping out of school","Riding the bus","Joining a sports team"],correct:1,why:"Virginia can suspend or deny a license for truancy or dropping out of school."},
+  // M2
+  {m:2,q:"The recommended hand position on the steering wheel is:",options:["10 and 2","9 and 3","8 and 4","One hand at 12"],correct:2,why:"The Virginia Driver's Manual recommends 8 and 4 o'clock — lower hands stay clear of the airbag, which deploys from the steering wheel. (You may see 9-and-3 elsewhere, but VA teaches 8-and-4.)"},
+  {m:2,q:"You should adjust your mirrors and seat:",options:["While driving","Before putting the car in gear","Only if it feels off","After you start moving"],correct:1,why:"Adjust seat, mirrors, and head restraint BEFORE driving so you never do it in motion."},
+  {m:2,q:"A head restraint should be positioned:",options:["As low as possible","Level with the top of your ears/head","Behind your shoulders","It doesn't matter"],correct:1,why:"Position it roughly level with the top of your ears to protect against whiplash in a rear crash."},
+  {m:2,q:"The lap belt of a seat belt should sit:",options:["Across your stomach","Low and snug across your hips/thighs","Under your arm","Loosely across your lap"],correct:1,why:"The manual says wear the lap belt low on your lap and against your thighs — not across the soft stomach."},
+  {m:2,q:"Blind spots are areas:",options:["Covered by your mirrors","Not easily seen around your vehicle","Directly in front of you","Only behind the trunk"],correct:1,why:"Blind spots are danger areas where vehicles can't be easily seen — always check over your shoulder before changing lanes."},
+  {m:2,q:"How far should you sit from the steering wheel for airbag safety?",options:["As close as possible","At least 10 inches from the wheel","Touching the wheel","Distance doesn't matter"],correct:1,why:"The manual says move your seat back so you are at least ten inches from the steering wheel."},
+  {m:2,q:"To best see your blind spots, you should:",options:["Rely only on mirrors","Glance over your shoulder","Use the backup camera","Honk first"],correct:1,why:"The best way to see a car in your blind spot is to quickly turn your head and glance over your shoulder before changing lanes."},
+  {m:2,q:"Part of a good pre-drive routine is making sure:",options:["The radio works","Mirrors are adjusted and doors are secured","The trunk is empty","Your phone is charged"],correct:1,why:"Adjust your mirrors and secure doors before driving for safe visibility and control."},
+  // M3
+  {m:3,q:"How far ahead should you focus your eyes while driving?",options:["1–2 seconds","5 seconds","20–30 seconds","1 minute"],correct:2,why:"The manual says expert drivers focus their eyes 20 to 30 seconds ahead — about one block in the city."},
+  {m:3,q:"Central vision is used mainly for:",options:["Detecting motion to the sides","Seeing fine detail and reading signs","Judging speed","Night driving only"],correct:1,why:"Central vision gives sharp detail for reading signs; peripheral vision detects motion to the sides."},
+  {m:3,q:"As your speed increases, your field of vision:",options:["Gets wider","Narrows","Stays the same","Improves"],correct:1,why:"The faster you go, the narrower your field of vision — another reason to slow down."},
+  {m:3,q:"While searching the road, you should:",options:["Stare at the car ahead","Keep your eyes moving and scan","Close one eye","Focus only on the road edge"],correct:1,why:"The manual says avoid staring at one thing — keep your eyes moving and read the road and your surroundings."},
+  {m:3,q:"When the sun causes glare, you should:",options:["Speed up to get past it","Use your visor and slow down","Turn on high beams","Close your eyes briefly"],correct:1,why:"Use your visor and sunglasses and slow down. Reduced visibility means you should increase following distance."},
+  {m:3,q:"You should check the traffic behind you:",options:["Once before driving","About every 10 seconds","Only when turning","Only on highways"],correct:1,why:"The Virginia manual says to use your rearview mirror to check traffic behind you frequently — about every 10 seconds."},
+  {m:3,q:"Before entering an intersection, you should look:",options:["Right only","Left, then right, then left again","Straight ahead only","Behind you"],correct:1,why:"The manual says check left, then right, then left again — cars from the left are closer to you first."},
+  {m:3,q:"If you can't see far enough ahead to stop safely, you should:",options:["Speed up","Slow down","Turn on high beams in fog","Follow the car ahead closely"],correct:1,why:"Reducing your speed should be your first response to decreased visibility — key in fog, rain, and at night."},
+  // M4
+  {m:4,q:"When you double your speed, your vehicle's energy of motion:",options:["Doubles","Triples","Quadruples (4x)","Stays the same"],correct:2,why:"Kinetic energy increases with the SQUARE of speed — double the speed = 4x the energy and a much longer stop."},
+  {m:4,q:"The force that keeps your tires gripping the road is:",options:["Gravity","Friction (traction)","Inertia","Momentum"],correct:1,why:"Friction between tires and road provides traction. Wet, icy, or worn-tire conditions reduce it."},
+  {m:4,q:"Inertia is the tendency of a moving object to:",options:["Stop quickly","Keep moving in a straight line","Turn on its own","Speed up downhill"],correct:1,why:"Inertia keeps a moving body moving straight ahead — it's why you lurch forward in a sudden stop."},
+  {m:4,q:"On a curve, your vehicle is pushed:",options:["Toward the inside","Toward the outside of the curve","Straight down","Backward"],correct:1,why:"Inertia pushes the car toward the outside of a curve. Slow before entering so traction can hold your path."},
+  {m:4,q:"What three factors determine total stopping distance?",options:["Speed, weight, color","Perception time, reaction distance, braking distance","Tires, brakes, fuel","Weather, time, traffic"],correct:1,why:"The manual lists perception time, reaction distance, and braking distance. Higher speed increases all three."},
+  {m:4,q:"When backing up, you should:",options:["Rely only on mirrors","Turn your body and head, look out the rear window, back slowly","Back as fast as possible","Use only the backup camera"],correct:1,why:"The manual says turn your body and head to the right, look out the rear window, and back up slowly — mirrors don't give a full view."},
+  {m:4,q:"Wet pavement can do what to your braking distance?",options:["Cut it in half","Have no effect","Double it","Make it shorter"],correct:2,why:"The manual notes that wet pavement can double your braking distance."},
+  {m:4,q:"The force of impact in a crash increases with:",options:["Lower speed","Greater speed and weight","Newer tires","A full gas tank"],correct:1,why:"Force of impact grows with both speed and vehicle weight — higher speed dramatically increases crash forces."},
+  // M5
+  {m:5,q:"An eight-sided (octagon) sign always means:",options:["Yield","Stop","No passing","School zone"],correct:1,why:"An octagon always means stop — the unique shape lets you identify it even when obscured."},
+  {m:5,q:"A yellow diamond-shaped sign indicates:",options:["A law you must obey","A warning of a hazard ahead","A construction zone","A destination"],correct:1,why:"Yellow diamond signs warn you of special conditions or hazards ahead — slow down and use caution."},
+  {m:5,q:"A solid yellow line on your side of the center line means:",options:["Pass when safe","Do not pass","Two-way turn lane","Bike lane"],correct:1,why:"You may not pass from the solid yellow line side. A broken yellow line means passing is allowed when the way is clear."},
+  {m:5,q:"Broken white lines on the road separate:",options:["Opposite directions of traffic","Lanes of traffic going the same direction","Parking from driving","Bus lanes only"],correct:1,why:"Broken white lines separate lanes going the SAME direction; yellow lines separate OPPOSITE directions."},
+  {m:5,q:"When entering a roundabout, you must:",options:["Speed up to merge","Stop completely first","Yield to pedestrians and traffic already in the circle","Honk first"],correct:2,why:"Entering traffic must yield to pedestrians and to traffic already in the circle, then travel counter-clockwise."},
+  {m:5,q:"A flashing red traffic light means:",options:["Speed up","Treat it like a yield","Stop, then go when the way is clear","The light is broken"],correct:2,why:"At a flashing red light, come to a complete stop and yield; you may go when the way is clear (like a stop sign)."},
+  {m:5,q:"When traffic signals are completely dark (power outage), you should:",options:["Speed through","Treat it as an all-way stop","Ignore the intersection","Wait for power to return"],correct:1,why:"The manual says when signals display no lights, stop and proceed as though it were an all-way stop."},
+  {m:5,q:"Unless otherwise posted, the speed limit in a school, business, or residential area is:",options:["15 mph","25 mph","35 mph","55 mph"],correct:1,why:"The manual sets 25 mph for school, business and residential areas; 35 for unpaved roads; 55 for all other roads."},
+  {m:5,q:"A five-sided (pentagon) sign marks:",options:["Railroad crossing","School zone / school crossing","Hospital","Do not enter"],correct:1,why:"The five-sided pentagon shape marks school zones and warns about school crossings."},
+  // M6
+  {m:6,q:"When following a motorcycle, you should:",options:["Follow closer than a car","Add an extra second of following distance","Pass immediately","Use your high beams"],correct:1,why:"The manual says never tailgate a motorcycle — add an extra second to your following distance (double it in bad weather)."},
+  {m:6,q:"A school bus on an undivided road stops with red lights flashing and stop arm out. You must:",options:["Pass carefully","Stop only if behind it","Stop whether you approach from any direction","Slow to 20 mph"],correct:2,why:"You must stop for a stopped school bus with flashing red lights when approaching from any direction on an undivided road, until all persons are clear and the bus moves."},
+  {m:6,q:"Large trucks and buses have big blind spots known as:",options:["Danger zones","No-Zones","Dead lanes","Brake areas"],correct:1,why:"Truck and bus blind spots are called No-Zones. If you can't see the driver's face in the mirror, they can't see you."},
+  {m:6,q:"When passing a stopped emergency vehicle with flashing lights, you should:",options:["Speed past","Change to a lane not next to it, or slow down","Stop completely","Honk"],correct:1,why:"The manual says change to a lane not next to the vehicle if you safely can; if you can't, reduce speed and proceed with caution."},
+  {m:6,q:"When a pedestrian is lawfully crossing in a crosswalk, you must:",options:["Proceed — cars have priority","Come to a full stop and yield","Honk and continue","Speed up to clear it"],correct:1,why:"Drivers are required to come to a full stop for pedestrians lawfully crossing — they have the right of way."},
+  {m:6,q:"When passing a bicyclist in Virginia, you must give at least:",options:["1 foot","2 feet","3 feet","6 feet"],correct:2,why:"State law requires passing a bicyclist with at least three feet of clearance; if the lane is too narrow, change lanes."},
+  {m:6,q:"In a work zone, you should:",options:["Maintain normal speed","Slow down, obey the posted limit, and watch for workers","Pass other cars quickly","Use high beams"],correct:1,why:"Obey the posted work-zone speed limit and avoid distractions; speeding fines in a work zone can reach $500."},
+  {m:6,q:"Why should you 'look twice' for motorcycles?",options:["They're loud","Their small size makes them hard to see and easy to misjudge","They're always speeding","They have no lights"],correct:1,why:"In over half of car-motorcycle crashes the driver didn't see the motorcycle. Its size makes speed and distance easy to misjudge."},
+  // M7
+  {m:7,q:"If your car begins to hydroplane on water, you should:",options:["Brake hard","Accelerate","Ease off the gas and steer straight","Turn sharply"],correct:2,why:"Ease off the accelerator and hold the wheel steady. Hard braking or sharp steering makes hydroplaning worse."},
+  {m:7,q:"If you veer off the pavement onto the shoulder, you should:",options:["Jerk the wheel back quickly","Brake hard","Don't panic — gradually slow, look where you want to go, ease back on","Speed up"],correct:2,why:"The manual says don't panic; gradually reduce speed, look in the direction you want to go, and slowly steer back onto the road."},
+  {m:7,q:"You must dim your high beams when an oncoming vehicle is within:",options:["100 feet","200 feet","500 feet","1000 feet"],correct:2,why:"Use high beams on highways unless an oncoming vehicle is within 500 feet. (When following, use low beams within 200 feet.)"},
+  {m:7,q:"In heavy fog, you should use:",options:["High beams","Low-beam headlights","No lights","Hazard lights only"],correct:1,why:"Fog reflects light, so use low-beam headlights in heavy fog and look for road-edge markings to guide you."},
+  {m:7,q:"Virginia law requires headlights on whenever:",options:["It's after midnight","You use your windshield wipers in bad weather","You're on a highway","You're in a tunnel"],correct:1,why:"You must use headlights whenever you use your wipers due to bad weather, and when visibility is reduced to 500 feet."},
+  {m:7,q:"In rain, snow, or fog you should:",options:["Use high beams","Reduce speed and double your following distance","Follow closely to see better","Drive normally"],correct:1,why:"Reduce speed first and increase your space cushion by doubling your normal following distance; turn on headlights."},
+  {m:7,q:"A wet road is most slippery during:",options:["After hours of rain","The first half-hour of rain","Only when freezing","It's never extra slippery"],correct:1,why:"The manual says roads are most slippery during the first half-hour of rain, when oil on the surface mixes with water before it washes away."},
+  {m:7,q:"When you need to stop on a slippery/icy road, you should:",options:["Brake firmly","Release the gas and apply the brakes gently","Accelerate through it","Pump the brakes hard"],correct:1,why:"The manual says release the accelerator and apply the brakes gently — you have the most traction and control when the front tires are still rolling."},
+  // M8
+  {m:8,q:"If your vehicle has antilock brakes (ABS), you should:",options:["Pump them in a hard stop","Never pump them — hold steady pressure","Use the parking brake instead","Avoid using them"],correct:1,why:"The manual is explicit: never pump antilock brakes. Hold firm, steady pressure and steer."},
+  {m:8,q:"Underinflated tires can cause:",options:["Better fuel economy","Poor handling and increased blowout risk","Faster stops","Longer tread life"],correct:1,why:"Low tire pressure hurts handling and fuel economy and raises blowout risk from overheating. Check pressure against the door-jamb PSI."},
+  {m:8,q:"How often should you check your tires with the penny test?",options:["Never","Once a month or before a long trip","Only when one is flat","Once a year"],correct:1,why:"The manual says check your tires for wear once every month, or before a long road trip, using the penny test."},
+  {m:8,q:"In the penny test, your tread is SAFE if:",options:["You can see all of Lincoln's head","Part of Lincoln's head is covered by the tread","The penny falls out","Lincoln is upside down"],correct:1,why:"Place Lincoln's head into the groove; if any part of his head is covered by the tread, you have a safe amount of tread."},
+  {m:8,q:"Where do you find your tire's recommended air pressure (PSI)?",options:["On the windshield","In the owner's manual or the driver's-side door jamb","On the dashboard","On the tire's color"],correct:1,why:"The recommended PSI is in the owner's manual or on the driver's-side door jamb."},
+  {m:8,q:"Wet pavement affects which part of stopping the most?",options:["Perception time","Braking distance","Reaction time","Hearing"],correct:1,why:"Braking distance is affected by speed, brake/tire condition, and pavement — wet pavement can double braking distance."},
+  {m:8,q:"Virginia requires your vehicle to pass a safety inspection:",options:["Never","Once when new","Annually","Every 5 years"],correct:2,why:"Your vehicle must pass an annual safety inspection and display a valid inspection sticker."},
+  {m:8,q:"Before driving in snow, you should:",options:["Clear only the windshield","Remove snow and ice from the entire car","Leave the roof covered","Warm the engine only"],correct:1,why:"Remove snow and ice from the whole car — roof, hood, windows, mirrors and lights — so it doesn't fly off or block your view."},
+  // M9
+  {m:9,q:"Air bags work best when:",options:["Used instead of seat belts","Used together with seat belts","The seat is far back","Inflated slowly"],correct:1,why:"The manual says air bags, used properly WITH safety belts, cushion you in a front-end crash and reduce the force of impact."},
+  {m:9,q:"For airbag safety, an adjustable steering wheel should be tilted:",options:["Upward toward your face","Downward toward your chest","All the way left","It doesn't matter"],correct:1,why:"Tilt the wheel downward so the air bag points toward your chest instead of your head and neck."},
+  {m:9,q:"The safest place to install a child safety seat is:",options:["The front passenger seat","The center of the back seat","The driver's lap","Anywhere"],correct:1,why:"The manual says the safest place to install a child safety seat is the center of the back seat."},
+  {m:9,q:"Rumble strips are designed to:",options:["Slow rain runoff","Alert drivers who drift or are drowsy","Mark exits","Improve traction"],correct:1,why:"Rumble strips create noise and vibration to alert a drifting or drowsy driver; drive over them slowly, don't swerve."},
+  {m:9,q:"Wearing a seat belt can:",options:["Slow the car down","Double your chances of surviving a crash","Replace airbags","Cause more injuries"],correct:1,why:"The manual says safety belts can double your chances of surviving a crash and more than double your chances of avoiding serious injury."},
+  {m:9,q:"Children are safest riding:",options:["In the front seat","Buckled in the back seat (ages 12 and under)","In an adult's lap","In the cargo area"],correct:1,why:"Children ages 12 and under are safer buckled up in the back seat."},
+  {m:9,q:"A rear-facing child seat may go in the front passenger seat only if:",options:["The child is over 2","The passenger airbag is off or absent","The seat reclines","Never under any condition"],correct:1,why:"A rear-facing seat may be placed in front only if there is no passenger airbag, or the passenger airbag is turned off."},
+  {m:9,q:"How does an air bag reduce injury in a front-end crash?",options:["By locking the doors","By cushioning the head, neck and chest from hitting the dash/column","By stopping the engine","By inflating the tires"],correct:1,why:"The air bag provides a cushion that keeps your head, neck and chest from hitting the steering column or dashboard."},
+  // M10
+  {m:10,q:"What BAC makes it illegal for a Virginia driver UNDER 21 to drive?",options:["0.02 or higher","0.05 or higher","0.08 or higher","0.10 or higher"],correct:0,why:"Under 21, you can be convicted of illegal consumption if your BAC is at least .02 but under .08. (The adult DUI limit is .08.)"},
+  {m:10,q:"What is the only thing that reduces intoxication over time?",options:["Coffee","A cold shower","Time","Exercise"],correct:2,why:"The manual states only time can decrease intoxication — coffee, cold showers, and exercise will not sober you up."},
+  {m:10,q:"If you drink and drive, alcohol affects your:",options:["Vision","Judgment","Coordination","All of these"],correct:3,why:"Even a small amount of alcohol affects vision, judgment, and coordination. This matches the Virginia manual's sample exam answer: 'all of these.'"},
+  {m:10,q:"Under Virginia's 'implied consent' law, by driving you agree to:",options:["Carry insurance","Take a breath test upon request if lawfully stopped","Random searches","Yearly eye exams"],correct:1,why:"Implied consent means by operating a vehicle on Virginia's public roads, you agree to take a breath test upon request."},
+  {m:10,q:"Twelve ounces of beer contains about the same alcohol as:",options:["A gallon of wine","A shot of liquor or a 5 oz glass of wine","Two beers","Nothing"],correct:1,why:"The manual states 12 ounces of beer is the same as a shot of liquor or a five-ounce glass of wine."},
+  {m:10,q:"Prescription and over-the-counter drugs can:",options:["Never affect driving","Cause drowsiness/dizziness and slow reaction time","Only matter with alcohol","Improve reaction time"],correct:1,why:"Many OTC and prescription drugs cause drowsiness and dizziness and slow reaction time. Read labels; no drug is harmless."},
+  {m:10,q:"The only sure way to avoid the risks of drinking and driving is to:",options:["Drive slowly","Decide before drinking that you won't drive","Wait 15 minutes","Drink water and drive"],correct:1,why:"The manual says decide before you start drinking that you won't drive — that decision is much harder after one or two drinks."},
+  {m:10,q:"Combining alcohol with another drug usually:",options:["Cancels both out","Multiplies the effects of both","Has no effect","Makes you a safer driver"],correct:1,why:"Combining alcohol with other drugs usually multiplies the effects of both and can be disastrous for your ability to drive."},
+  // M11
+  {m:11,q:"The three main types of distraction are:",options:["Loud, quiet, medium","Visual, manual, and cognitive","Front, side, rear","Day, night, dusk"],correct:1,why:"Distractions are visual (eyes off road), manual (hands off wheel), and cognitive (mind off driving). Texting is all three."},
+  {m:11,q:"Virginia law prohibits drivers from:",options:["Using GPS for navigation","Holding a cell phone or wireless device while driving","Listening to the radio","Talking to passengers"],correct:1,why:"Virginia law prohibits holding a cell phone or wireless communications device while driving, except in an emergency or when lawfully parked."},
+  {m:11,q:"The best way to handle drowsiness while driving is to:",options:["Open a window","Turn up the radio","Stop at a safe place and rest or switch drivers","Drink caffeine and continue"],correct:2,why:"The manual says rolling down a window, radio, gum, and caffeine do NOT prevent drowsy driving. Stop and rest, or switch drivers."},
+  {m:11,q:"To avoid drowsy driving on a long trip, you should:",options:["Drive straight through","Stop at least every two hours for rest","Drive only at night","Skip meals"],correct:1,why:"The manual recommends limiting long-distance driving and stopping at least every two hours for rest; avoid 10 p.m.–6 a.m."},
+  {m:11,q:"If your phone rings while driving and you're under 18, you should:",options:["Answer hands-free","Not use the phone at all","Pull over to text","Answer quickly"],correct:1,why:"Drivers under 18 may not use a phone at all while driving. Let it go to voicemail or stop somewhere safe."},
+  {m:11,q:"When should you set your GPS, music, and climate controls?",options:["While driving","As soon as you get in, before you begin driving","At red lights","Whenever convenient"],correct:1,why:"The manual says set or adjust the vehicle's controls and other devices as soon as you get in the car and before you begin driving."},
+  {m:11,q:"Distracted driving is dangerous mainly because:",options:["It uses fuel","The vehicle can move into a high-risk situation before you react","It drains the battery","It's illegal only"],correct:1,why:"While the driver is distracted the vehicle may move into a high-risk situation, costing precious seconds before the driver reacts."},
+  {m:11,q:"Young, distracted drivers commonly:",options:["Drive too slowly","Fail to maintain control, follow too closely, and fail to yield","Use too many mirrors","Brake too early"],correct:1,why:"The manual notes failing to maintain control, following too closely, and not yielding are common actions of young distracted drivers."},
+  // M12
+  {m:12,q:"If you're involved in a crash, you must FIRST:",options:["Drive home","Stop at the scene (or as close as safely possible)","Call your insurance only","Post about it"],correct:1,why:"Always stop at the scene of the crash, or as close as possible without blocking traffic."},
+  {m:12,q:"After a crash, you must report it to police when:",options:["It's only a small scratch","There is property damage, personal injury, or death","You feel like it","Never"],correct:1,why:"Crashes involving property damage, personal injury, or death must be reported to the police as quickly as possible."},
+  {m:12,q:"At a crash, you should exchange:",options:["Phone passwords","Name, address, license number, plate, and insurance info","Social media handles","Nothing"],correct:1,why:"Exchange names, addresses, license numbers, plate numbers, and insurance policy information with others involved."},
+  {m:12,q:"To register a vehicle in Virginia, you must:",options:["Only have a license","Have liability insurance or pay the $500 uninsured fee","Carry cash","Have a CB radio"],correct:1,why:"You must have liability insurance or pay the $500 uninsured motor vehicle fee to register and operate a vehicle."},
+  {m:12,q:"If you see an aggressive driver, you should:",options:["Challenge them","Stay out of the way, avoid eye contact, don't engage","Speed up to escape","Block them"],correct:1,why:"The manual says stay out of the way, don't challenge them, and avoid eye contact — ignore gestures and shouting."},
+  {m:12,q:"If you damage an unattended vehicle and can't find the owner, you must:",options:["Drive away","Leave a note and report it to police within 24 hours","Wait all day","Do nothing"],correct:1,why:"Leave a note with your name, number, date/time and damage description, and report the crash to police within 24 hours."},
+  {m:12,q:"If you move, you must notify the DMV of your new address within:",options:["No requirement","30 days","1 year","5 years"],correct:1,why:"You are required to notify DMV within 30 days of moving — the postal service won't forward your license."},
+  {m:12,q:"When an emergency vehicle approaches from behind with siren and lights, you must:",options:["Speed up","Pull over to the right edge and stop until it passes","Stop in your lane","Ignore it"],correct:1,why:"Immediately yield: safely pull over to the right edge of the road and stop until the emergency vehicle has passed."},
+];
+
+const PASS_PCT = 80, EXAM_SIZE = 25, CHALLENGE_SECONDS = 20;
+
+// inline SVG icons
+const ICON = {
+  car:'<svg viewBox="0 0 24 24" fill="#FFD23F"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11h1a1 1 0 011 1v4a1 1 0 01-1 1h-1a2 2 0 11-4 0H9a2 2 0 11-4 0H4a1 1 0 01-1-1v-4a1 1 0 011-1h1zm2.2-1h9.6l-1-3H8.2l-1 3z"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5.5 5.5 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3C21 5.5 22.5 9 21.5 12.5 19 16.65 12 21 12 21z"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24" fill="#FFD23F"><path d="M6 4h12v2h2v3a4 4 0 01-4 4h-.3A4 4 0 0113 16v2h2v2H9v-2h2v-2a4 4 0 01-2.7-3H8a4 4 0 01-4-4V6h2V4zm0 4H4v1a2 2 0 002 2V8zm12 0v3a2 2 0 002-2V8h-2z"/></svg>',
+  bolt:'<svg viewBox="0 0 24 24" fill="#FFD23F"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>',
+};
+
+let state = {};
+function reset(){ state = {screen:"start",mode:"study",scopeMod:null,deck:[],idx:0,picked:null,answered:false,score:0,streak:0,best:0,lives:3,correct:0,missed:[],secs:CHALLENGE_SECONDS,timer:null,flash:null}; }
+reset();
+
+const countFor = m => QUESTIONS.filter(x=>x.m===m).length;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function beginRound(modId){
+  const pool = modId==null ? QUESTIONS : QUESTIONS.filter(q=>q.m===modId);
+  const size = modId==null ? Math.min(EXAM_SIZE,pool.length) : pool.length;
+  clearInterval(state.timer);
+  Object.assign(state,{scopeMod:modId,deck:shuffle(pool).slice(0,size),idx:0,picked:null,answered:false,
+    score:0,streak:0,best:0,lives:3,correct:0,missed:[],secs:CHALLENGE_SECONDS,flash:null,screen:"play"});
+  render();
+  if(state.mode==="challenge") startTimer();
+}
+function startTimer(){
+  clearInterval(state.timer);
+  state.timer = setInterval(()=>{
+    if(state.answered){clearInterval(state.timer);return;}
+    state.secs--;
+    if(state.secs<=0){clearInterval(state.timer);answer(-1);return;}
+    const el=document.getElementById("timer"); if(el) el.textContent="⏱ "+state.secs+"s";
+    if(el && state.secs<=5) el.style.color="var(--red)";
+  },1000);
+}
+function answer(i){
+  if(state.answered) return;
+  clearInterval(state.timer);
+  const cur = state.deck[state.idx];
+  const right = i===cur.correct;
+  state.picked=i; state.answered=true; state.flash = right?"good":"bad";
+  if(right){
+    const ns=state.streak+1, mult=1+Math.min(ns-1,5)*0.2, bonus=state.mode==="challenge"?state.secs*5:0;
+    state.score=Math.round(state.score+100*mult+bonus); state.streak=ns; state.best=Math.max(state.best,ns); state.correct++;
+  }else{
+    state.streak=0; state.lives--; state.missed.push(cur);
+  }
+  render();
+}
+function next(){
+  if(state.lives<=0 || state.idx+1>=state.deck.length){ state.screen="end"; clearInterval(state.timer); render(); return; }
+  state.idx++; state.picked=null; state.answered=false; state.secs=CHALLENGE_SECONDS; state.flash=null;
+  render();
+  if(state.mode==="challenge") startTimer();
+}
+
+function render(){
+  const app=document.getElementById("app");
+  const s=state;
+  if(s.screen==="start"){
+    app.innerHTML = `
+      <div class="center" style="padding-top:24px">
+        <span class="tag">📍 VIRGINIA · VADETS FINAL PREP</span>
+        <h1>ROAD<span>READY</span></h1>
+        <p class="lead">All <b>12 modules</b>, ${QUESTIONS.length} questions. Pick a mode, then take a full mock exam or drill one module. Hit <b>${PASS_PCT}%</b> to pass.</p>
+        <div style="max-width:460px;margin:0 auto">
+          <button class="btn modeBtn pulse" style="background:var(--green)" onclick="window._mode('study')">
+            <span class="ic">📖</span><span><span class="t">Study Mode</span><br><span class="d">No timer · explains every answer</span></span>
+          </button>
+          <button class="btn modeBtn" style="background:var(--line);color:#1a1a1a" onclick="window._mode('challenge')">
+            <span class="ic">⏱️</span><span><span class="t">Challenge Mode</span><br><span class="d" style="color:#000;opacity:.7">${CHALLENGE_SECONDS}s per question · time-bonus points</span></span>
+          </button>
+        </div>
+      </div>`;
+  }
+  else if(s.screen==="scope"){
+    const cards = MODULES.map(m=>`
+      <button class="btn modCard" onclick="window._begin(${m.id})">
+        <span class="top"><span class="num">MODULE ${m.id}</span><span class="qc">${countFor(m.id)} Q</span></span>
+        <span class="nm">${m.name}</span>
+      </button>`).join("");
+    app.innerHTML = `
+      <button class="btn backBtn" onclick="window._back()">‹ Mode</button>
+      <h2 style="font-size:24px;font-weight:900;margin:8px 0 2px">What do you want to study?</h2>
+      <p class="sub" style="margin-bottom:18px;font-size:14px">${s.mode==="study"?"Study Mode":"Challenge Mode"} selected. Take the full mock exam, or drill a single module.</p>
+      <button class="btn examBtn" onclick="window._begin(null)">
+        <span style="font-size:24px">🎓</span>
+        <span style="flex:1"><span class="t">Full Mock Exam</span><br><span class="d">${EXAM_SIZE} questions mixed from all 12 modules — closest to the real final</span></span>
+        <span style="color:var(--line);font-size:20px">›</span>
+      </button>
+      <div class="orRow">▦ OR DRILL ONE MODULE</div>
+      <div class="modGrid">${cards}</div>`;
+  }
+  else if(s.screen==="play"){
+    const cur=s.deck[s.idx], total=s.deck.length;
+    const mod=MODULES[cur.m-1];
+    const hearts=[0,1,2].map(n=>{const on=n<s.lives;return `<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:${on?'#E03131':'none'};stroke:${on?'#E03131':'#3a3f49'};stroke-width:1.6"><path d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5.5 5.5 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3C21 5.5 22.5 9 21.5 12.5 19 16.65 12 21 12 21z"/></svg>`;}).join("");
+    const multTxt = s.streak>1 ? `<span style="color:var(--line);font-weight:900;font-size:12px">×${(1+Math.min(s.streak-1,5)*0.2).toFixed(1)}</span>` : "";
+    const seen = s.idx + (s.answered?1:0);
+    const pct = Math.round((s.correct/Math.max(seen,1))*100);
+    const carPos = (s.idx/Math.max(total-1,1))*92;
+    const opts = cur.options.map((opt,i)=>{
+      let cls="opt", mark="";
+      if(s.answered){
+        if(i===cur.correct){cls+=" correct"; mark='<span class="mark" style="color:var(--green)">✓</span>';}
+        else if(i===s.picked){cls+=" wrong"; mark='<span class="mark" style="color:var(--red)">✕</span>';}
+        else cls+=" dim";
+      }
+      return `<button class="${cls}" ${s.answered?"disabled":""} onclick="window._answer(${i})">
+        <span><span class="lab">${String.fromCharCode(65+i)}</span>${esc(opt)}</span>${mark}</button>`;
+    }).join("");
+    let whyHtml="";
+    if(s.answered && (s.mode==="study" || s.picked!==cur.correct)){
+      const ok=s.picked===cur.correct;
+      const head = ok?"Correct!":(s.picked===-1?"Time's up!":"Not quite.");
+      whyHtml = `<div class="why"><div class="head" style="color:${ok?'var(--green)':'var(--red)'}">${head}</div><div class="body">${esc(cur.why)}</div></div>`;
+    }
+    const nextHtml = s.answered ? `<button class="btn nextBtn" onclick="window._next()">${(s.idx+1>=total||s.lives<=0)?"See Results":"Next"} ›</button>` : "";
+    const timerHtml = (s.mode==="challenge"&&!s.answered) ? `<span class="timer" id="timer" style="color:var(--line)">⏱ ${s.secs}s</span>` : "<span></span>";
+    app.innerHTML = `
+      <div class="hud">
+        <span class="chip">${ICON.trophy}<b>${s.score}</b></span>
+        <span class="chip">${ICON.bolt}<b>${s.streak}</b><span style="color:var(--sub);font-size:12px">streak</span>${multTxt}</span>
+        <span class="chip" style="gap:3px">${hearts}</span>
+      </div>
+      <div class="scopeName">${s.scopeMod==null?"Full Mock Exam":"Module "+s.scopeMod+": "+mod.short}</div>
+      <div class="road">
+        <div class="dashes"></div>
+        <div class="car" style="left:calc(${carPos}%)">${ICON.car}</div>
+        <span class="flag">🏁</span>
+      </div>
+      <div class="meta"><span>Question ${s.idx+1} / ${total}</span>${timerHtml}<span>${pct}% correct</span></div>
+      <div class="card ${s.flash||""}">
+        <span class="badge">MODULE ${cur.m} · ${mod.short.toUpperCase()}</span>
+        <div class="qtext">${esc(cur.q)}</div>
+        <div class="opts">${opts}</div>
+        ${whyHtml}${nextHtml}
+      </div>`;
+  }
+  else if(s.screen==="end"){
+    const total=s.deck.length;
+    const finalPct=Math.round((s.correct/total)*100);
+    const passed=finalPct>=PASS_PCT;
+    const scope = s.scopeMod==null?"Full Mock Exam":"Module "+s.scopeMod+": "+MODULES[s.scopeMod-1].short;
+    let reviewHtml="";
+    if(s.missed.length){
+      reviewHtml = `<div class="review"><h3>Review these:</h3>` + s.missed.map(m=>`
+        <div class="rev"><div class="m">MODULE ${m.m}</div><div class="q">${esc(m.q)}</div>
+        <div class="a">✓ ${esc(m.options[m.correct])}</div><div class="w">${esc(m.why)}</div></div>`).join("") + `</div>`;
+    }
+    app.innerHTML = `
+      <div class="center" style="padding-top:18px">
+        <div class="award">${passed?"🏆":"🚗"}</div>
+        <h2 style="font-size:28px;font-weight:900;margin:4px 0">${s.lives<=0?"Out of lives!":(passed?"You passed!":"Keep practicing")}</h2>
+        <div class="sub" style="font-size:13px;font-weight:700;margin-bottom:4px">${scope}</div>
+        <div class="bigpct" style="color:${passed?'var(--green)':'var(--red)'}">${finalPct}%</div>
+        <p class="sub" style="margin-top:4px">${s.correct} of ${total} correct · need ${PASS_PCT}% to pass</p>
+        <div class="stats">
+          <div class="statBox"><div class="statNum">${s.score}</div><div class="statLbl">Score</div></div>
+          <div class="statBox"><div class="statNum">${s.best}🔥</div><div class="statLbl">Best streak</div></div>
+          <div class="statBox"><div class="statNum">${s.missed.length}</div><div class="statLbl">To review</div></div>
+        </div>
+        ${reviewHtml}
+        <div class="endBtns">
+          <button class="btn retry" onclick="window._begin(${s.scopeMod==null?'null':s.scopeMod})">↻ Retry</button>
+          <button class="btn change" onclick="window._scope()">Pick Another Module</button>
+        </div>
+        <div class="footer">Questions verified against the Virginia Driver's Manual.<br>Study tool only — not affiliated with Virginia DMV or VADETS.</div>
+      </div>`;
+  }
+}
+
+// handlers
+window._mode = m => { state.mode=m; state.screen="scope"; render(); };
+window._back = () => { state.screen="start"; render(); };
+window._scope = () => { state.screen="scope"; render(); };
+window._begin = m => beginRound(m);
+window._answer = i => answer(i);
+window._next = () => next();
+
+render();
+</script>
+</body>
+</html>
